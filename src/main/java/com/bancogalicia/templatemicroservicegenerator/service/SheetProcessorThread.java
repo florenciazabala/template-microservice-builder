@@ -1,5 +1,6 @@
 package com.bancogalicia.templatemicroservicegenerator.service;
 
+import com.bancogalicia.templatemicroservicegenerator.models.EndpointConfig;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,27 @@ import java.util.List;
 public class SheetProcessorThread implements Runnable {
 
     @Autowired
-    PojoProcessor pojoProcessor = new PojoProcessor();
-    public List<Sheet> sheets;
+    PojoProcessor pojoProcessor;
 
-    public SheetProcessorThread(){
+    @Autowired
+    EndpointConfigProcessor endpointConfigProcessor;
+
+    public static int SHEETS_PROCECESS = 0;
+
+    private List<Sheet> sheets;
+
+    private String destinationPath;
+
+
+    public SheetProcessorThread() {
+    }
+
+    public SheetProcessorThread(String destinationPath){
+
         this.sheets = new ArrayList<>();
+        this.destinationPath = destinationPath;
+        this.pojoProcessor = new PojoProcessor();
+        this.endpointConfigProcessor = new EndpointConfigProcessor();
     }
 
     @Override
@@ -28,35 +45,39 @@ public class SheetProcessorThread implements Runnable {
         processSheets();
     }
 
-    private void processSheets(){
+    synchronized private void processSheets(){
         System.out.println(Thread.currentThread().getName() + " sheets: " + sheets.size());
 
         List<String> classesToCreate = new ArrayList<>();
         sheets.forEach(sheet -> classesToCreate.addAll(processSheet(sheet)));
-        classesToCreate.forEach(classToProcess -> createClass("C:\\Users\\Florencia\\Downloads\\example.java",classToProcess));
+        classesToCreate.forEach(classToProcess -> createClass(String.format("%s%s%d.java",destinationPath, "\\model\\example",SHEETS_PROCECESS++),classToProcess));
     }
 
     private List<String> processSheet(Sheet sheet){
+            System.out.println(SHEETS_PROCECESS);
+            //1° Extraigo objetos con info --> Config, request, response
+            //2° Genero clases
+            // En Lugar de lista con clases map key --> Nombre de la clase, si ya existe agrego endpoint
 
-        //1° Extraigo objetos con info --> Config, request, response
-        //2° Genero clases
-        // En Lugar de lista con clases map key --> Nombre de la clase, si ya existe agrego endpoint
-
-        //Process endpoint data
-        //Process request
-        //process response
-        List<String> classesToCreate = new ArrayList<>();
-        classesToCreate.add(pojoProcessor.getPojoClass(sheet,4,5));
-        return classesToCreate;
+            //Process endpoint data
+            //Process request
+            //process response
+            EndpointConfig endpointConfig = endpointConfigProcessor.getBasicConfig(sheet);
+            List<String> classesToCreate = new ArrayList<>();
+            classesToCreate.add(pojoProcessor.getPojoClass(sheet, endpointConfig.getClassName(), 6, 7));
+            return classesToCreate;
     }
 
     private void createClass(String to, String classToCreate){
-        Path path = Paths.get(to);
-        try {
-            Files.writeString(path,classToCreate,StandardCharsets.UTF_8);
-        } catch (IOException ex) {
-            System.out.print("Invalid Path");
-        }
+
+            Path path = Paths.get(to);
+            try {
+                System.out.println("In create class " + to);
+                Files.writeString(path, classToCreate, StandardCharsets.UTF_8);
+            } catch (IOException ex) {
+                System.out.print("Invalid Path");
+            }
+
     }
 
 

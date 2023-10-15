@@ -15,5 +15,5 @@ public class EndpointConfig {
 
     private String className;
 
-    private String autenticationMethod; //Crear enum
+    private AuthenticationMethod autenticationMethod; //Crear enum
 }

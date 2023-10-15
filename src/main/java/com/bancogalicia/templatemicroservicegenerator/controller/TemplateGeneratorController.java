@@ -15,6 +15,6 @@ public class TemplateGeneratorController {
     TemplateGeneratorService templateGeneratorService;
     @PostMapping("")
     public void processTemplate(@RequestBody ProcessTemplateRequest processTemplateRequest){
-        templateGeneratorService.readExcel(processTemplateRequest.getTemplatePath());
+        templateGeneratorService.readExcel(processTemplateRequest.getTemplatePath(), processTemplateRequest.getMicroservicePath());
     }
 }

@@ -21,12 +21,7 @@ public class TemplateMicroserviceGeneratorApplication {
 		SpringApplication.run(TemplateMicroserviceGeneratorApplication.class, args);
 
 		TemplateGeneratorService templateGeneratorService = new TemplateGeneratorService();
-		templateGeneratorService.readExcel("C:\\Users\\Florencia\\Downloads\\template.xlsx");
-
-		System.out.println(StringUtil.snakeCaseToCammelCase("i_am_a_snake_variable"));
-		System.out.println(StringUtil.snakeCaseToCammelCase("_i_Am_a_snake_vAriable_"));
-		System.out.println(StringUtil.cammelCaseToSnakeCase("iAmACammelVaiable"));
-		System.out.println(StringUtil.cammelCaseToSnakeCase("IAmAnUpperCammelVaiable"));
+		templateGeneratorService.readExcel("C:\\Users\\Florencia\\Downloads\\template-galicia.xlsx","C:\\template-galicia\\pom-idpo-exampletemplate\\src\\main\\java\\ar\\com\\bancogalicia\\pom\\idpo\\exampletemplate");
 
 		OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
 

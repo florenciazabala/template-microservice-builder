@@ -24,13 +24,15 @@ public class PojoProcessor {
     private  final  String ATTRIBUTE_TEMPLATE  = "@JsonProperty(\"%s\")\n" +
             "private %s %s;";
 
+    private  final String CLASS_NAME = "%sDTO";
+
     //Environment
     private final int ROW_SINCE = 6;
 
-    public String getPojoClass(Sheet sheet, int columnType, int columnValue){
+    public String getPojoClass(Sheet sheet, String className, int columnType, int columnValue){
         Map<String, String> attributtes = getAttributtes(sheet,columnType,columnValue);
         List<String> attributesTemplate = attributesTemplate(attributtes);
-        return buildClass(new ArrayList<>(),"ExampleClassName",attributesTemplate);
+        return buildClass(new ArrayList<>(),String.format(CLASS_NAME, className),attributesTemplate);
     }
     public Map<String, String> getAttributtes(Sheet sheet, int columnType, int columnValue){
         //Guardar en 1 mapa clave attributte name, valor tipo dato

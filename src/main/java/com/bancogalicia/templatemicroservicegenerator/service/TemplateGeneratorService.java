@@ -28,7 +28,7 @@ public class TemplateGeneratorService {
 
     List<Thread> threads = new ArrayList<>();
 
-    public void readExcel(String templatePath){
+    public void readExcel(String templatePath, String destinationPath){
 
         try {
 
@@ -45,7 +45,7 @@ public class TemplateGeneratorService {
 
             List<SheetProcessorThread> sheetProcessorTask = new ArrayList<>();
             for(int i = 0; i < NUMBER_OF_THREADS; i++){
-                sheetProcessorTask.add(new SheetProcessorThread());
+                sheetProcessorTask.add(new SheetProcessorThread(destinationPath));
             }
 
             int i = 0;
