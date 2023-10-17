@@ -1,26 +1,33 @@
 package com.bancogalicia.templatemicroservicegenerator;
 
 import com.bancogalicia.templatemicroservicegenerator.service.TemplateGeneratorService;
-import com.bancogalicia.templatemicroservicegenerator.utils.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
 @SpringBootApplication
+@Component
 public class TemplateMicroserviceGeneratorApplication {
-	@Autowired
-	TemplateGeneratorService templateGeneratorService;
 
+	@Autowired
+	static TemplateGeneratorService templateGeneratorService;
+	static ApplicationContext context;
 
 	public static void main(String[] args) {
 
 
-		SpringApplication.run(TemplateMicroserviceGeneratorApplication.class, args);
+		//SpringApplication.run(TemplateMicroserviceGeneratorApplication.class, args);
 
-		TemplateGeneratorService templateGeneratorService = new TemplateGeneratorService();
+		// added this - get reference to application context
+		context = SpringApplication.run(TemplateMicroserviceGeneratorApplication.class, args);
+		// added this - get the object via the context as a bean
+		templateGeneratorService = (TemplateGeneratorService) context.getBean("templateGeneratorService");
+
 		templateGeneratorService.readExcel("C:\\Users\\Florencia\\Downloads\\template-galicia.xlsx","C:\\template-galicia\\pom-idpo-exampletemplate\\src\\main\\java\\ar\\com\\bancogalicia\\pom\\idpo\\exampletemplate");
 
 		OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();

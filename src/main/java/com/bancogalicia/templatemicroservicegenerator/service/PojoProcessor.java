@@ -1,9 +1,12 @@
 package com.bancogalicia.templatemicroservicegenerator.service;
 
+import com.bancogalicia.templatemicroservicegenerator.models.TemplateMicroservice;
+import com.bancogalicia.templatemicroservicegenerator.repository.TemplateMicroservicesRespository;
 import com.bancogalicia.templatemicroservicegenerator.utils.StringUtil;
 import io.micrometer.common.util.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -14,17 +17,14 @@ import java.util.Map;
 
 @Service
 public class PojoProcessor {
-
-    //Guardar en 1 base Mongo? --> id, type, value
+    @Autowired
+    TemplateMicroservicesRespository templateMicroservicesRespository;
 
     //Agregar package y anotations
-    private final String CLASS_TEMPLATE = "%s\n@Data\n" +
-            "@JsonIgnoreProperties(ignoreUnknown = true)\n" +
-            "@JsonInclude(JsonInclude.Include.NON_NULL)\npublic class %s {\n\n%s\n\n}";
-    private  final  String ATTRIBUTE_TEMPLATE  = "@JsonProperty(\"%s\")\n" +
-            "private %s %s;";
+    private final String CLASS_TEMPLATE =  "pojo_class";
+    private  final  String ATTRIBUTE_TEMPLATE  = "pojo_attribute";
 
-    private  final String CLASS_NAME = "%sDTO";
+    private  final String CLASS_NAME = "pojo_class_name";
 
     //Environment
     private final int ROW_SINCE = 6;
@@ -32,7 +32,8 @@ public class PojoProcessor {
     public String getPojoClass(Sheet sheet, String className, int columnType, int columnValue){
         Map<String, String> attributtes = getAttributtes(sheet,columnType,columnValue);
         List<String> attributesTemplate = attributesTemplate(attributtes);
-        return buildClass(new ArrayList<>(),String.format(CLASS_NAME, className),attributesTemplate);
+        return buildClass(new ArrayList<>(),String.format(templateMicroservicesRespository.findByName(CLASS_NAME).orElse(
+                new TemplateMicroservice()).getStructure(), className),attributesTemplate);
     }
     public Map<String, String> getAttributtes(Sheet sheet, int columnType, int columnValue){
         //Guardar en 1 mapa clave attributte name, valor tipo dato
@@ -52,7 +53,8 @@ public class PojoProcessor {
         List<String> attributesTemplate = new ArrayList<>();
         attributes.forEach(
                 (k, v) -> attributesTemplate.add(
-                        String.format(ATTRIBUTE_TEMPLATE,k,v, StringUtil.snakeCaseToCammelCase(k)
+                        String.format(templateMicroservicesRespository.findByName(ATTRIBUTE_TEMPLATE).orElse(
+                                new TemplateMicroservice()).getStructure(),k,v, StringUtil.snakeCaseToCammelCase(k)
                         )
                 ));
         return attributesTemplate;
@@ -60,6 +62,7 @@ public class PojoProcessor {
 
     public String buildClass(List<String> imports,String className, List<String> attributes){
         String attributtesFormatted = attributes.stream().map(e -> e + "\n").reduce("", String::concat);
-        return String.format(CLASS_TEMPLATE,"",className,attributtesFormatted);
+        return String.format(templateMicroservicesRespository.findByName(CLASS_TEMPLATE).orElse(
+                new TemplateMicroservice()).getStructure(),"",className,attributtesFormatted);
     }
 }
