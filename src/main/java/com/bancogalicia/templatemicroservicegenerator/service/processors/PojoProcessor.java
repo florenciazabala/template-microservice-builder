@@ -1,4 +1,4 @@
-package com.bancogalicia.templatemicroservicegenerator.service;
+package com.bancogalicia.templatemicroservicegenerator.service.processors;
 
 import com.bancogalicia.templatemicroservicegenerator.models.TemplateMicroservice;
 import com.bancogalicia.templatemicroservicegenerator.repository.TemplateMicroservicesRespository;

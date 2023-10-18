@@ -1,9 +1,10 @@
-package com.bancogalicia.templatemicroservicegenerator.service;
+package com.bancogalicia.templatemicroservicegenerator.service.tasks;
 
 import com.bancogalicia.templatemicroservicegenerator.models.EndpointConfig;
 import com.bancogalicia.templatemicroservicegenerator.repository.TemplateMicroservicesRespository;
+import com.bancogalicia.templatemicroservicegenerator.service.processors.EndpointConfigProcessor;
+import com.bancogalicia.templatemicroservicegenerator.service.processors.PojoProcessor;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -14,30 +15,24 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component
 public class SheetProcessorThread implements Runnable {
 
-    PojoProcessor pojoProcessor;
+    private PojoProcessor pojoProcessor;
 
-    EndpointConfigProcessor endpointConfigProcessor;
+    private EndpointConfigProcessor endpointConfigProcessor;
 
-    TemplateMicroservicesRespository templateMicroservicesRespository;
-
-    public static int SHEETS_PROCECESS = 0;
+    private ThreadSafeQueue queue;
 
     private List<Sheet> sheets;
 
-    private String destinationPath;
+    private SheetCounter sheetsCounter;
 
-
-    public SheetProcessorThread() {
-    }
-
-    public SheetProcessorThread(String destinationPath, TemplateMicroservicesRespository templateMicroservicesRespository, EndpointConfigProcessor endpointConfigProcessor){
+    public SheetProcessorThread(ThreadSafeQueue queue,SheetCounter sheetsCounter, TemplateMicroservicesRespository templateMicroservicesRespository, EndpointConfigProcessor endpointConfigProcessor){
+        this.queue = queue;
         this.sheets = new ArrayList<>();
-        this.destinationPath = destinationPath;
         this.pojoProcessor = new PojoProcessor(templateMicroservicesRespository);
         this.endpointConfigProcessor = endpointConfigProcessor;
+        this.sheetsCounter = sheetsCounter;
     }
 
     @Override
@@ -50,11 +45,20 @@ public class SheetProcessorThread implements Runnable {
 
         List<String> classesToCreate = new ArrayList<>();
         sheets.forEach(sheet -> classesToCreate.addAll(processSheet(sheet)));
-        classesToCreate.forEach(classToProcess -> createClass(String.format("%s%s%d.java",destinationPath, "\\model\\example",SHEETS_PROCECESS++),classToProcess));
+
+        classesToCreate.forEach(c -> queue.add(c));
+
+
+       if (sheetsCounter.getItems() == 6) { //En este caso 1 clase x hoja
+            queue.terminate();
+            System.out.println("No more sheets to read");
+       }
+
     }
 
     private List<String> processSheet(Sheet sheet){
-           // System.out.println(SHEETS_PROCECESS);
+            sheetsCounter.increment();
+            System.out.println("Sheets count: "+sheetsCounter.getItems());
 
             //1° Extraigo objetos con info --> Config, request, response
             //2° Genero clases
@@ -69,22 +73,9 @@ public class SheetProcessorThread implements Runnable {
             return classesToCreate;
     }
 
-    private void createClass(String to, String classToCreate){
-
-            Path path = Paths.get(to);
-            try {
-                System.out.println("In create class " + to);
-                Files.writeString(path, classToCreate, StandardCharsets.UTF_8);
-            } catch (IOException ex) {
-                System.out.print("Invalid Path");
-            }
-
-    }
-
 
     public void addSheet(Sheet sheet){
         this.sheets.add(sheet);
     }
 
 }
-

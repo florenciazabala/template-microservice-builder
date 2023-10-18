@@ -2,6 +2,11 @@ package com.bancogalicia.templatemicroservicegenerator.service;
 
 import com.bancogalicia.templatemicroservicegenerator.models.TemplateMicroservice;
 import com.bancogalicia.templatemicroservicegenerator.repository.TemplateMicroservicesRespository;
+import com.bancogalicia.templatemicroservicegenerator.service.processors.EndpointConfigProcessor;
+import com.bancogalicia.templatemicroservicegenerator.service.tasks.ClassWriterThread;
+import com.bancogalicia.templatemicroservicegenerator.service.tasks.SheetCounter;
+import com.bancogalicia.templatemicroservicegenerator.service.tasks.SheetProcessorThread;
+import com.bancogalicia.templatemicroservicegenerator.service.tasks.ThreadSafeQueue;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -55,7 +60,7 @@ public class TemplateGeneratorService {
 
     }
 
-    private void distributeSheets(String templatePath, String destinationPath) throws IOException {
+    private void distributeSheets(String templatePath, String destinationPath) throws IOException, InterruptedException {
 
         FileInputStream file = new FileInputStream(new File(templatePath));
 
@@ -68,9 +73,13 @@ public class TemplateGeneratorService {
             sheets.add(workbook.getSheetAt(i));
         }
 
+        //Producers
+        ThreadSafeQueue queue = new ThreadSafeQueue();
+        SheetCounter sheetsCounter = new SheetCounter();
+
         List<SheetProcessorThread> sheetProcessorTask = new ArrayList<>();
         for(int i = 0; i < NUMBER_OF_THREADS; i++){
-            sheetProcessorTask.add(new SheetProcessorThread(destinationPath,templateMicroservicesRespository,endpointConfigProcessor));
+            sheetProcessorTask.add(new SheetProcessorThread(queue,sheetsCounter,templateMicroservicesRespository,endpointConfigProcessor));
         }
 
         int i = 0;
@@ -82,7 +91,12 @@ public class TemplateGeneratorService {
 
         sheetProcessorTask.forEach(runnable -> threads.add(new Thread(runnable)));
 
+        //Consumer
+        Thread classWriterThread =new Thread(new ClassWriterThread(queue,destinationPath));
+
         threads.forEach(thread -> thread.start());
+        classWriterThread.start();
+
         threads.forEach(thread -> {
             try {
                 thread.join();
@@ -90,6 +104,9 @@ public class TemplateGeneratorService {
                 throw new RuntimeException(e);
             }
         });
+
+        classWriterThread.join();
+
     }
 
     private void changeImplementationRestTemplateBean(String destinationPath) throws IOException {
