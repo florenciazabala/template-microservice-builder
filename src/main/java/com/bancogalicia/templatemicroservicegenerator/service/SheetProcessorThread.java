@@ -1,6 +1,7 @@
 package com.bancogalicia.templatemicroservicegenerator.service;
 
 import com.bancogalicia.templatemicroservicegenerator.models.EndpointConfig;
+import com.bancogalicia.templatemicroservicegenerator.repository.TemplateMicroservicesRespository;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +17,11 @@ import java.util.List;
 @Component
 public class SheetProcessorThread implements Runnable {
 
-    @Autowired
     PojoProcessor pojoProcessor;
 
-    @Autowired
     EndpointConfigProcessor endpointConfigProcessor;
+
+    TemplateMicroservicesRespository templateMicroservicesRespository;
 
     public static int SHEETS_PROCECESS = 0;
 
@@ -32,12 +33,11 @@ public class SheetProcessorThread implements Runnable {
     public SheetProcessorThread() {
     }
 
-    public SheetProcessorThread(String destinationPath){
-
+    public SheetProcessorThread(String destinationPath, TemplateMicroservicesRespository templateMicroservicesRespository, EndpointConfigProcessor endpointConfigProcessor){
         this.sheets = new ArrayList<>();
         this.destinationPath = destinationPath;
-        this.pojoProcessor = new PojoProcessor();
-        this.endpointConfigProcessor = new EndpointConfigProcessor();
+        this.pojoProcessor = new PojoProcessor(templateMicroservicesRespository);
+        this.endpointConfigProcessor = endpointConfigProcessor;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class SheetProcessorThread implements Runnable {
         processSheets();
     }
 
-    synchronized private void processSheets(){
+    private void processSheets(){
         System.out.println(Thread.currentThread().getName() + " sheets: " + sheets.size());
 
         List<String> classesToCreate = new ArrayList<>();
@@ -54,7 +54,8 @@ public class SheetProcessorThread implements Runnable {
     }
 
     private List<String> processSheet(Sheet sheet){
-            System.out.println(SHEETS_PROCECESS);
+           // System.out.println(SHEETS_PROCECESS);
+
             //1° Extraigo objetos con info --> Config, request, response
             //2° Genero clases
             // En Lugar de lista con clases map key --> Nombre de la clase, si ya existe agrego endpoint
@@ -84,4 +85,6 @@ public class SheetProcessorThread implements Runnable {
     public void addSheet(Sheet sheet){
         this.sheets.add(sheet);
     }
+
 }
+

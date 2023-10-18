@@ -20,6 +20,10 @@ public class PojoProcessor {
     @Autowired
     TemplateMicroservicesRespository templateMicroservicesRespository;
 
+    public PojoProcessor(TemplateMicroservicesRespository templateMicroservicesRespository) {
+        this.templateMicroservicesRespository = templateMicroservicesRespository;
+    }
+
     //Agregar package y anotations
     private final String CLASS_TEMPLATE =  "pojo_class";
     private  final  String ATTRIBUTE_TEMPLATE  = "pojo_attribute";

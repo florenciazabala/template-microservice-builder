@@ -7,9 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
-
 @SpringBootApplication
 @Component
 public class TemplateMicroserviceGeneratorApplication {
@@ -30,13 +27,13 @@ public class TemplateMicroserviceGeneratorApplication {
 
 		templateGeneratorService.readExcel("C:\\Users\\Florencia\\Downloads\\template-galicia.xlsx","C:\\template-galicia\\pom-idpo-exampletemplate\\src\\main\\java\\ar\\com\\bancogalicia\\pom\\idpo\\exampletemplate");
 
-		OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
+		/*OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
 
 		int availableProcessors = osBean.getAvailableProcessors(); // Núcleos virtuales
 		int physicalCores = Runtime.getRuntime().availableProcessors(); // Núcleos físicos
 
 		System.out.println("Núcleos virtuales: " + availableProcessors);
-		System.out.println("Núcleos físicos: " + physicalCores);
+		System.out.println("Núcleos físicos: " + physicalCores);*/
 	}
 
 }
