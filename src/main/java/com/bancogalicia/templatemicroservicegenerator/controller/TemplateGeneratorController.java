@@ -1,9 +1,8 @@
 package com.bancogalicia.templatemicroservicegenerator.controller;
 
 import com.bancogalicia.templatemicroservicegenerator.models.ProcessTemplateRequest;
-import com.bancogalicia.templatemicroservicegenerator.service.TemplateGeneratorService;
+import com.bancogalicia.templatemicroservicegenerator.service.TemplateGeneratorServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,9 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class TemplateGeneratorController {
 
     @Autowired
-    TemplateGeneratorService templateGeneratorService;
+    TemplateGeneratorServiceImpl templateGeneratorService;
     @PostMapping("")
     public void processTemplate(@RequestBody ProcessTemplateRequest processTemplateRequest){
-        templateGeneratorService.readExcel(processTemplateRequest.getTemplatePath(), processTemplateRequest.getMicroservicePath());
+        templateGeneratorService.readExcel(processTemplateRequest.getTemplatePath(), processTemplateRequest.getMicroservicePath(), processTemplateRequest.getNumberOfThreads());
     }
 }

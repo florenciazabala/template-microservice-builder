@@ -12,4 +12,7 @@ public class ProcessTemplateRequest {
     @JsonProperty("microservice_path")
     private String microservicePath;
 
+    @JsonProperty("numberOfThreads")
+    private int numberOfThreads;
+
 }

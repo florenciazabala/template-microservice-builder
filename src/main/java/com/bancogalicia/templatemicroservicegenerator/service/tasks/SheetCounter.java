@@ -9,6 +9,7 @@ public class SheetCounter {
     public void increment(){
         synchronized (this.lock){
             items++;
+            System.out.println("Sheets count: "+items);
         }
     }
 

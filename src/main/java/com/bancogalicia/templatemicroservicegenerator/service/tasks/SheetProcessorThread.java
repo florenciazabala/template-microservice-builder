@@ -49,16 +49,16 @@ public class SheetProcessorThread implements Runnable {
         classesToCreate.forEach(c -> queue.add(c));
 
 
-       if (sheetsCounter.getItems() == 6) { //En este caso 1 clase x hoja
+       /*if (sheetsCounter.getItems() == 6) { //En este caso 1 clase x hoja
             queue.terminate();
             System.out.println("No more sheets to read");
-       }
+       }*/
 
     }
 
     private List<String> processSheet(Sheet sheet){
             sheetsCounter.increment();
-            System.out.println("Sheets count: "+sheetsCounter.getItems());
+            //System.out.println("Sheets count: "+sheetsCounter.getItems());
 
             //1° Extraigo objetos con info --> Config, request, response
             //2° Genero clases
